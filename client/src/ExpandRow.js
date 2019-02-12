@@ -1,25 +1,21 @@
+/* eslint-disable react/destructuring-assignment */
+/* eslint-disable  react/prop-types */
+/* eslint-disable  guard-for-in  */
+/*  eslint-disable  no-restricted-syntax */
 import React, { Component } from 'react';
-import axios from 'axios';
 import {
   BootstrapTable,
   TableHeaderColumn,
   DeleteButton,
   InsertButton,
 } from 'react-bootstrap-table';
-import { observable, action } from 'mobx';
 import { observer } from 'mobx-react';
+
 import './style.css';
 
 class ExpandRow extends Component {
-  state = {
-    products: [],
-  };
-
-  // get The List of products from Database
   componentWillMount() {
-    axios.get('http://localhost:3030/products').then(result => {
-      this.setState({ products: result.data.data });
-    });
+    this.props.store.getProduct();
   }
 
   /* Insert functions */
@@ -36,37 +32,16 @@ class ExpandRow extends Component {
   );
 
   onAfterInsertRow = row => {
-    axios.post(`http://localhost:3030/products/`, {
-      id: row.id,
-      product: row.product,
-      company: row.company,
-      country: row.country,
-      description: row.description,
-    });
+    this.props.store.addProduct(row);
   };
-
   /**/
+
   /* Edit Functions */
-  onAfterSaveCell = (row, cellName, cellValue) => {
-    // console.log(`Save cell ${cellName} with value ${cellValue}`);
-    // console.log('The whole row :',row);
-    const idProduct = row.id;
-    axios
-      .patch(`http://localhost:3030/products/${idProduct}`, {
-        product: row.product,
-        company: row.company,
-        country: row.country,
-        description: row.description,
-      })
-      .then(response => {
-        console.log(response);
-      })
-      .catch(error => {
-        console.log(error);
-      });
+  onAfterSaveCell = row => {
+    this.props.store.patchProduct(row);
   };
-
   /**/
+
   /* Delete Functions */
   handleDeleteButtonClick = onClick => {
     onClick();
@@ -83,7 +58,7 @@ class ExpandRow extends Component {
   onAfterDeleteRow = row => {
     for (const i in row) {
       const deletedProductId = row[i];
-      axios.delete(`http://localhost:3030/products/${deletedProductId}`);
+      this.props.store.deleteProduct(deletedProductId);
     }
   };
 
@@ -96,11 +71,9 @@ class ExpandRow extends Component {
 
   expandComponent = row => (
     <div>
-      <p>specific info about product {row.description} </p>
+      <p>The Description of product is : {row.description} </p>
     </div>
   );
-
-  /**/
 
   render() {
     const options = {
@@ -108,14 +81,14 @@ class ExpandRow extends Component {
       afterDeleteRow: this.onAfterDeleteRow,
       deleteBtn: this.createCustomDeleteButton,
       expandRowBgColor: 'grey',
-      expandBy: 'column', // Currently, available value is row and column, default is row
+      expandBy: 'column',
     };
-    const product = this.state.products;
+    const product = this.props.store.products.productsArray;
 
     const selectRow = {
       mode: 'checkbox',
-      clickToSelect: true, // click to select, default is false
-      clickToExpand: true, // click to expand row, default is false
+      clickToSelect: true,
+      clickToExpand: true,
     };
     return (
       <React.Fragment>
@@ -134,7 +107,6 @@ class ExpandRow extends Component {
           deleteRow
           insertRow
           hover
-          // {cellEditProp}
         >
           <TableHeaderColumn dataField="id" isKey>
             Product Id &nbsp;&nbsp;
@@ -157,5 +129,4 @@ class ExpandRow extends Component {
     );
   }
 }
-
-export default ExpandRow;
+export default observer(ExpandRow);
