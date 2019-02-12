@@ -1,14 +1,12 @@
-module.exports = {
+export default {
   "extends": ["airbnb", "prettier", "prettier/react"],
   "parser": "babel-eslint",
   "parserOptions": {
-    "ecmaVersion": 8,
     "ecmaFeatures": {
-      "experimentalObjectRestSpread": true,
-      "impliedStrict": true,
-      "classes": true
+        "jsx": true,
+        "modules": true
     }
-  },
+},
   "env": {
     "browser": true,
     "node": true,
@@ -103,4 +101,4 @@ module.exports = {
     // "html",
     "prettier"
   ]
-}
+};
